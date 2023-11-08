@@ -54,7 +54,7 @@ class CassandraDataMigrationTaskTestSpec extends BaseTestSpec {
   }
 
   "CassandraDataMigrationTask" should "generate event" in {
-    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic))//.thenReturn(new CassandraDataMigrationMapSource)
+    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).thenReturn(new CassandraDataMigrationMapSource)
     new CassandraDataMigrationStreamTask(jobConfig, mockKafkaUtil).process()
   }
 }
