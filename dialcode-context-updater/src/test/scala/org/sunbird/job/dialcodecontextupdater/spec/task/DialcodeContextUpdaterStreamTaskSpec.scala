@@ -14,6 +14,7 @@ import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import org.mockito.ArgumentMatchers.{any, anyString, contains}
 import org.mockito.Mockito
 import org.mockito.Mockito._
+import org.mockito.stubbing.OngoingStubbing
 import org.sunbird.job.Metrics
 import org.sunbird.job.connector.FlinkKafkaConnector
 import org.sunbird.job.dialcodecontextupdater.domain.Event
@@ -62,7 +63,7 @@ class DialcodeContextUpdaterStreamTaskSpec extends BaseTestSpec {
 
 
   def initialize(): Unit = {
-    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).thenReturn(new DialcodeContextUpdaterEventSource)
+    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).asInstanceOf[OngoingStubbing[DialcodeContextUpdaterEventSource]].thenReturn(new DialcodeContextUpdaterEventSource)
   }
 
   ignore should " update the dial context " in {

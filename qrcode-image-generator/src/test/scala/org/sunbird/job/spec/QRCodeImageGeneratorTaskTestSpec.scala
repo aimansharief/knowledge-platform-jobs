@@ -13,6 +13,7 @@ import org.cassandraunit.dataset.cql.FileCQLDataSet
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import org.mockito.Mockito
 import org.mockito.Mockito.when
+import org.mockito.stubbing.OngoingStubbing
 import org.sunbird.job.connector.FlinkKafkaConnector
 import org.sunbird.job.fixture.EventFixture
 import org.sunbird.job.qrimagegenerator.domain.Event
@@ -67,7 +68,7 @@ class QRCodeImageGeneratorTaskTestSpec extends BaseTestSpec {
     when(mockElasticUtil.getDocumentAsString("V2B5A2")).thenReturn(V2B5A2Json)
     when(mockElasticUtil.getDocumentAsString("F6J3E7")).thenReturn(F6J3E7Json)
 
-    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).thenReturn(new QRCodeImageGeneratorMapSource)
+    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).asInstanceOf[OngoingStubbing[QRCodeImageGeneratorMapSource]].thenReturn(new QRCodeImageGeneratorMapSource)
     new QRCodeImageGeneratorTask(jobConfig, mockKafkaUtil).process()
 //    assertThrows[JobExecutionException] {
 //      new QRCodeImageGeneratorTask(jobConfig, mockKafkaUtil).process()

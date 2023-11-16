@@ -16,6 +16,7 @@ import org.sunbird.job.util.{CassandraUtil, HTTPResponse, HttpUtil, JSONUtil}
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers.{any, anyString, contains}
+import org.mockito.stubbing.OngoingStubbing
 import org.sunbird.job.connector.FlinkKafkaConnector
 import org.sunbird.job.videostream.domain.Event
 import org.sunbird.job.fixture.EventFixture
@@ -78,7 +79,7 @@ class VideoStreamGeneratorTaskTestSpec extends BaseTestSpec {
   }
 
   ignore should "submit a job" in {
-    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).thenReturn(new VideoStreamGeneratorMapSource)
+    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).asInstanceOf[OngoingStubbing[VideoStreamGeneratorMapSource]].thenReturn(new VideoStreamGeneratorMapSource)
 
     when(mockHttpUtil.post_map(contains("/oauth2/token"), any[Map[String, AnyRef]](), any[Map[String, String]]())).thenReturn(HTTPResponse(200, accessTokenResp))
     when(mockHttpUtil.put(contains("/providers/Microsoft.Media/mediaServices/"+jobConfig.getSystemConfig("azure.account.name")+"/assets/asset-"), anyString(), any())).thenReturn(HTTPResponse(200, assetJson))

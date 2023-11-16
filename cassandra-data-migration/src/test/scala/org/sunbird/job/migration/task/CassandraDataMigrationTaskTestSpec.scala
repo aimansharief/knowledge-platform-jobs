@@ -12,6 +12,7 @@ import org.cassandraunit.dataset.cql.FileCQLDataSet
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import org.mockito.Mockito
 import org.mockito.Mockito.when
+import org.mockito.stubbing.OngoingStubbing
 import org.sunbird.job.connector.FlinkKafkaConnector
 import org.sunbird.job.migration.domain.Event
 import org.sunbird.job.migration.fixture.EventFixture
@@ -54,7 +55,7 @@ class CassandraDataMigrationTaskTestSpec extends BaseTestSpec {
   }
 
   "CassandraDataMigrationTask" should "generate event" in {
-    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).thenReturn(new CassandraDataMigrationMapSource)
+    when(mockKafkaUtil.kafkaJobRequestSource[Event](jobConfig.kafkaInputTopic)).asInstanceOf[OngoingStubbing[CassandraDataMigrationMapSource]].thenReturn(new CassandraDataMigrationMapSource)
     new CassandraDataMigrationStreamTask(jobConfig, mockKafkaUtil).process()
   }
 }

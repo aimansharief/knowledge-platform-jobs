@@ -32,7 +32,7 @@ class FrameworkDataEnrichmentTestSpec extends FlatSpec with BeforeAndAfterAll wi
 		enrichFrameworkMasterCategoryMap()
 
 		val data = new ObjectData("do_123", Map[String, AnyRef]("name" -> "Content Name", "identifier" -> "do_123", "IL_UNIQUE_ID" -> "do_123", "pkgVersion" -> 0.0.asInstanceOf[AnyRef], "framework" -> "NCF", "targetFWIds" -> List("TPD", "NCFCOPY","NCF").asJava, "mediumIds" -> List("ncf_medium_telugu").asJava, "targetMediumIds" -> List("ncf_medium_english").asJava, "boardIds" -> List("ncf_board_cbse").asJava, "targetBoardIds" -> List("ncfcopy_board_ncert").asJava))
-		when(mockNeo4JUtil.getNodesName(ArgumentMatchers.anyObject())).thenReturn(Map[String, String]("ncf_medium_telugu" -> "Telugu", "ncf_medium_english" -> "English",  "ncf_board_cbse" -> "CBSE", "ncfcopy_board_ncert" -> "NCERT"))
+		when(mockNeo4JUtil.getNodesName(ArgumentMatchers.any())).thenReturn(Map[String, String]("ncf_medium_telugu" -> "Telugu", "ncf_medium_english" -> "English",  "ncf_board_cbse" -> "CBSE", "ncfcopy_board_ncert" -> "NCERT"))
 		when(mockConfig.getString("master.category.validation.enabled", "Yes")).thenReturn("Yes")
 		val obj = new TestFrameworkDataEnrichment()
 		val result = obj.enrichFrameworkData(data)
@@ -51,7 +51,7 @@ class FrameworkDataEnrichmentTestSpec extends FlatSpec with BeforeAndAfterAll wi
 
 	"enrichFrameworkData with only targetFramework" should "enrich only se_FWIds" in {
 		val data = new ObjectData("do_123", Map[String, AnyRef]("name" -> "Content Name", "identifier" -> "do_123", "IL_UNIQUE_ID" -> "do_123", "pkgVersion" -> 0.0.asInstanceOf[AnyRef], "framework" -> "NCF", "targetFWIds" -> List("TPD", "NCFCOPY").asJava))
-		when(mockNeo4JUtil.getNodesName(ArgumentMatchers.anyObject())).thenReturn(Map[String, String]("ncf_medium_telugu" -> "Telugu", "ncf_medium_english" -> "English",  "ncf_board_cbse" -> "CBSE", "ncfcopy_board_ncert" -> "NCERT"))
+		when(mockNeo4JUtil.getNodesName(ArgumentMatchers.any())).thenReturn(Map[String, String]("ncf_medium_telugu" -> "Telugu", "ncf_medium_english" -> "English",  "ncf_board_cbse" -> "CBSE", "ncfcopy_board_ncert" -> "NCERT"))
 		val obj = new TestFrameworkDataEnrichment()
 		val result = obj.enrichFrameworkData(data)
 		result.metadata.contains("se_mediumIds") should be (false)
@@ -65,7 +65,7 @@ class FrameworkDataEnrichmentTestSpec extends FlatSpec with BeforeAndAfterAll wi
 
 	"enrichFrameworkData with board, medium, gradeLevel and subject " should "enrich se_boards, se_mediums, se_gradeLevels and se_subjects" in {
 		val data = new ObjectData("do_123", Map[String, AnyRef]("name" -> "Content Name", "identifier" -> "do_123", "IL_UNIQUE_ID" -> "do_123", "pkgVersion" -> 0.0.asInstanceOf[AnyRef], "framework" -> "NCF", "board" -> "some board", "medium" -> List("some medium 1", "some_medium_2").asJava))
-		when(mockNeo4JUtil.getNodesName(ArgumentMatchers.anyObject())).thenReturn(Map[String, String]("ncf_medium_telugu" -> "Telugu", "ncf_medium_english" -> "English",  "ncf_board_cbse" -> "CBSE", "ncfcopy_board_ncert" -> "NCERT"))
+		when(mockNeo4JUtil.getNodesName(ArgumentMatchers.any())).thenReturn(Map[String, String]("ncf_medium_telugu" -> "Telugu", "ncf_medium_english" -> "English",  "ncf_board_cbse" -> "CBSE", "ncfcopy_board_ncert" -> "NCERT"))
 		val obj = new TestFrameworkDataEnrichment()
 		val result = obj.enrichFrameworkData(data)
 		result.metadata.contains("se_mediumIds") should be (false)

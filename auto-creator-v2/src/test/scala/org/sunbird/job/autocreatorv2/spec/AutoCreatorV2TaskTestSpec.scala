@@ -9,6 +9,7 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceCont
 import org.apache.flink.test.util.MiniClusterWithClientResource
 import org.mockito.Mockito
 import org.mockito.Mockito.when
+import org.mockito.stubbing.OngoingStubbing
 import org.sunbird.job.autocreatorv2.domain.Event
 import org.sunbird.job.autocreatorv2.fixture.EventFixture
 import org.sunbird.job.connector.FlinkKafkaConnector
@@ -60,7 +61,7 @@ class AutoCreatorV2TaskTestSpec extends BaseTestSpec {
   }
 
    ignore should "generate event" in {
-    when(mockKafkaUtil.kafkaMapSource(jobConfig.kafkaInputTopic)).thenReturn(new AutoCreatorV2MapSource)
+    when(mockKafkaUtil.kafkaMapSource(jobConfig.kafkaInputTopic)).asInstanceOf[OngoingStubbing[AutoCreatorV2MapSource]].thenReturn(new AutoCreatorV2MapSource)
     new AutoCreatorV2StreamTask(jobConfig, mockKafkaUtil, mockHttpUtil).process()
   }
 }
