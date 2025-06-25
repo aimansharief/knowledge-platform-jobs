@@ -20,7 +20,6 @@ trait FrameworkDataEnrichment {
 
 	//private val fwMetaFields = List("boardIds", "subjectIds", "mediumIds", "topicsIds", "gradeLevelIds", "targetBoardIds", "targetSubjectIds", "targetMediumIds", "targetTopicIds", "targetGradeLevelIds")
 	//private val fwMetaMap = Map(("se_boardIds", "se_boards") -> List("boardIds", "targetBoardIds"), ("se_subjectIds", "se_subjects") -> List("subjectIds", "targetSubjectIds"), ("se_mediumIds", "se_mediums") -> List("mediumIds", "targetMediumIds"), ("se_topicIds", "se_topics") -> List("topicsIds", "targetTopicIds"), ("se_gradeLevelIds", "se_gradeLevels") -> List("gradeLevelIds", "targetGradeLevelIds"))
-
 	// private val frameworkCategorySearchMetadataMapping: HashMap[String, String] = HashMap[String, String]("se_boards" -> "board", "se_subjects"-> "subject", "se_mediums" -> "medium", "se_topics"-> "topic", "se_gradeLevels"-> "gradeLevel")
 
 	def enrichFrameworkData(obj: ObjectData)(implicit neo4JUtil: Neo4JUtil, config: PublishConfig): ObjectData = {

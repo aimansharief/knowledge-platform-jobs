@@ -12,6 +12,7 @@ import org.sunbird.job.domain.`object`.{DefinitionCache, ObjectDefinition}
 import com.google.gson.Gson
 import org.sunbird.job.exception.InvalidEventException
 import org.sunbird.job.transaction.task.TransactionEventProcessorConfig
+
 import scala.collection.JavaConverters._
 import java.io.IOException
 import java.util
