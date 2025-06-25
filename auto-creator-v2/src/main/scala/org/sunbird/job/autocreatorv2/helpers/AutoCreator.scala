@@ -44,8 +44,8 @@ trait AutoCreator extends ObjectUpdater with CollectionUpdater with HierarchyEnr
       .find(p => StringUtils.equalsIgnoreCase(identifier, p.getOrElse("identifier", "").asInstanceOf[String])).getOrElse(Map())
     if (metaUrl.nonEmpty) {
       // TODO: deprecate setting "origin" after single sourcing refactoring.
-			val repoUrl = if(StringUtils.isNotBlank(metaUrl.head) && StringUtils.contains(metaUrl.head, "fields")) metaUrl.head.split("\\?")(0) else metaUrl.head
-      val originData = s"""{\"identifier\": \"$identifier\",\"repository\":\"${repoUrl}\"}"""
+			val repoUrl = if (StringUtils.isNotBlank(metaUrl.head) && StringUtils.contains(metaUrl.head, "fields")) metaUrl.head.split("\\?")(0) else metaUrl.head
+			val originData = s"""{\"identifier\": \"$identifier\",\"repository\":\"${repoUrl}\"}"""
       val originDetails = Map[String, AnyRef]("origin" -> identifier, "originData" -> originData)
       val metadata = getMetaUrlData(metaUrl.head, objectType)(httpUtil) ++ originDetails
       manifestMetadata.++(metadata)
@@ -102,7 +102,7 @@ trait AutoCreator extends ObjectUpdater with CollectionUpdater with HierarchyEnr
 			logger.info("Processing Children Having Identifier : " + ch._1)
 			val objType = ch._2.asInstanceOf[Map[String, AnyRef]].getOrElse("objectType", "").asInstanceOf[String]
 			val schemaVersion = ch._2.asInstanceOf[Map[String, AnyRef]].getOrElse("schemaVersion", "").asInstanceOf[String]
-			val defVer: String = if(StringUtils.equalsIgnoreCase("1.1", schemaVersion)) schemaVersion else config.schemaSupportVersionMap.getOrElse(objType.toLowerCase(), "1.0").asInstanceOf[String]
+			val defVer: String = if (StringUtils.equalsIgnoreCase("1.1", schemaVersion)) schemaVersion else config.schemaSupportVersionMap.getOrElse(objType.toLowerCase(), "1.0").asInstanceOf[String]
 			val definition: ObjectDefinition = defCache.getDefinition(objType, defVer, config.definitionBasePath)
 			val downloadUrl = ch._2.asInstanceOf[Map[String, AnyRef]].getOrElse("downloadUrl", "").asInstanceOf[String]
 			val props = definition.getSchemaProps() ++ definition.getExternalProps().keySet.toList
