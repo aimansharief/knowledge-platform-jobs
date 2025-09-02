@@ -12,6 +12,13 @@ import scala.collection.JavaConverters._
 
 class ContentPublishConfig(override val config: Config) extends PublishConfig(config, "content-publish") {
 
+  val contentServiceBase: String = config.getString("service.content.basePath")
+  val contentReadURL = s"${contentServiceBase}/content/v3/read/"
+
+  val searchServiceBase: String = config.getString("service.search.basePath")
+  val searchServiceURL = s"${searchServiceBase}/v3/search"
+  val difficultyMultiplier: Int = config.getInt("difficulty.multiplier")
+
   implicit val mapTypeInfo: TypeInformation[util.Map[String, AnyRef]] = TypeExtractor.getForClass(classOf[util.Map[String, AnyRef]])
   implicit val stringTypeInfo: TypeInformation[String] = TypeExtractor.getForClass(classOf[String])
   implicit val publishMetaTypeInfo: TypeInformation[Event] = TypeExtractor.getForClass(classOf[Event])
@@ -23,6 +30,7 @@ class ContentPublishConfig(override val config: Config) extends PublishConfig(co
   val kafkaInputTopic: String = config.getString("kafka.input.topic")
   val postPublishTopic: String = config.getString("kafka.post_publish.topic")
   val mvcTopic: String = config.getString("kafka.mvc.topic")
+  val refreshBodyTopic: String = config.getString("kafka.refresh_body.topic")
   val kafkaErrorTopic: String = config.getString("kafka.error.topic")
   val inputConsumerName = "content-publish-consumer"
 
@@ -62,6 +70,7 @@ class ContentPublishConfig(override val config: Config) extends PublishConfig(co
   // Out Tags
   val contentPublishOutTag: OutputTag[Event] = OutputTag[Event]("content-publish")
   val collectionPublishOutTag: OutputTag[Event] = OutputTag[Event]("collection-publish")
+  val refreshBodyOutTag: OutputTag[Event] = OutputTag[Event]("refresh-body")
   val generateVideoStreamingOutTag: OutputTag[String] = OutputTag[String]("video-streaming-generator-request")
   val failedEventOutTag: OutputTag[String] = OutputTag[String]("failed-event")
   val generatePostPublishProcessTag: OutputTag[String] = OutputTag[String]("post-publish-process-request")
@@ -99,5 +108,13 @@ class ContentPublishConfig(override val config: Config) extends PublishConfig(co
   val allowedExtensionsWord: util.List[String] = if (config.hasPath("mimetype.allowed_extensions.word")) config.getStringList("mimetype.allowed_extensions.word") else util.Arrays.asList[String]("doc", "docx", "ppt", "pptx", "key", "odp", "pps", "odt", "wpd", "wps", "wks")
   val enableDIALContextUpdate: String = if (config.hasPath("enableDIALContextUpdate")) config.getString("enableDIALContextUpdate") else "No"
 
+  // Defaults used by ECML builder and consumers
+  val defaultIsShuffleOption: Boolean = if (config.hasPath("content.publish.defaults.isShuffleOption")) config.getBoolean("content.publish.defaults.isShuffleOption") else true
+  val defaultIsPartialScore: Boolean = if (config.hasPath("content.publish.defaults.isPartialScore")) config.getBoolean("content.publish.defaults.isPartialScore") else true
+
   val isrRelativePathEnabled: Boolean = if (config.hasPath("cloudstorage.metadata.replace_absolute_path")) config.getBoolean("cloudstorage.metadata.replace_absolute_path") else false
+
+  // Learning Service Configuration
+  val learningServiceBase: String = config.getString("service.learning_service.basePath")
+  val learningServiceURL = s"${learningServiceBase}/learning-service/assessment/v3/items/read/"
 }

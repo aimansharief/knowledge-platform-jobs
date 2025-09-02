@@ -35,8 +35,20 @@ class PublishEventRouter(config: ContentPublishConfig) extends BaseProcessFuncti
     if (event.validEvent(config)) {
       event.objectType match {
         case "Content" | "ContentImage" => {
-          logger.info("PublishEventRouter :: Sending Content For Publish Having Identifier: " + event.identifier)
-          context.output(config.contentPublishOutTag, event)
+          event.action match {
+            case "publish" => {
+              logger.info("PublishEventRouter :: Sending Content For Publish Having Identifier: " + event.identifier)
+              context.output(config.contentPublishOutTag, event)
+            }
+            case "refresh-body" => {
+              logger.info("PublishEventRouter :: Sending Content For Refresh Body Having Identifier: " + event.identifier)
+              context.output(config.refreshBodyOutTag, event)
+            }
+            case _ => {
+              metrics.incCounter(config.skippedEventCount)
+              logger.info("Invalid Action Received For Content.| Identifier : " + event.identifier + " , action : " + event.action)
+            }
+          }
         }
         case "Collection" | "CollectionImage" => {
           logger.info("PublishEventRouter :: Sending Collection For Publish Having Identifier: " + event.identifier)

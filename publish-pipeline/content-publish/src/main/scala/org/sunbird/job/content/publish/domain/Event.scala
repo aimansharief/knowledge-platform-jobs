@@ -33,7 +33,7 @@ class Event(eventMap: java.util.Map[String, Any], partition: Int, offset: Long) 
   }
 
   def validEvent(config: ContentPublishConfig): Boolean = {
-    ((StringUtils.equals("publish", action) && StringUtils.isNotBlank(identifier))
+    (( (StringUtils.equals("publish", action) || StringUtils.equals("refresh-body", action)) && StringUtils.isNotBlank(identifier))
       && (config.supportedObjectType.contains(objectType) && config.supportedMimeType.contains(mimeType))
       && !StringUtils.equalsIgnoreCase("Asset", contentType))
   }
