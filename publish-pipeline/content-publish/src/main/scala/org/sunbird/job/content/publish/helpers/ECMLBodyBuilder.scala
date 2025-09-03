@@ -33,43 +33,6 @@ object ECMLBodyBuilder {
     }
     def extractTitle(item: Map[String, AnyRef]): String = getString(item, "title", getString(item, "name", "")).trim
 
-    // Parse options from the body JSON string and convert to MCQ format
-    def parseAndFormatOptions(item: Map[String, AnyRef]): List[Map[String, Any]] = {
-      val bodyStr = getString(item, "body")
-      if (bodyStr.nonEmpty) {
-        try {
-          val bodyJson = parse(bodyStr)
-          val options = (bodyJson \ "data" \ "data" \ "options").extract[List[Map[String, Any]]]
-          val questionTitle = extractTitle(item).replace("\\r", "")
-          if (questionTitle.toLowerCase.contains("primary key") || questionTitle.toLowerCase.contains("alter")) {
-            // Special case for primary key questions
-            List(
-              Map("text" -> "<p>Yes</p>\\n", "image" -> "", "audio" -> "", "audioName" -> "", "hint" -> "", "isCorrect" -> false, "$$hashKey" -> "object:439"),
-              Map("text" -> "<p>No</p>\\n",  "image" -> "", "audio" -> "", "audioName" -> "", "hint" -> "", "isCorrect" -> true,  "$$hashKey" -> "object:440")
-            )
-          } else {
-            // Generic option parsing from body
-            options.zipWithIndex.map { case (opt, idx) =>
-              val isCorrect = opt.getOrElse("isCorrect", false) match {
-                case b: Boolean => b
-                case s: String => s.toBoolean
-                case _ => false
-              }
-              Map(
-                "text" -> opt.getOrElse("text", s"<p>Option ${idx + 1}</p>\\n").toString,
-                "image" -> opt.getOrElse("image", "").toString,
-                "audio" -> opt.getOrElse("audio", "").toString,
-                "audioName" -> opt.getOrElse("audioName", "").toString,
-                "hint" -> opt.getOrElse("hint", "").toString,
-                "isCorrect" -> isCorrect,
-                "$$hashKey" -> s"object:${439 + idx}"
-              )
-            }
-          }
-        } catch { case _: Exception => List.empty }
-      } else List.empty
-    }
-
     // Parse raw item level options from the body JSON and convert to expected format
     def parseRawItemOptions(item: Map[String, AnyRef]): List[Map[String, Any]] = {
       val bodyStr = getString(item, "body")
@@ -97,24 +60,30 @@ object ECMLBodyBuilder {
       } else Nil
     }
 
-    // Build question data for plugin format
-    def buildQuestionData(item: Map[String, AnyRef]): String = {
+    // Parse raw item level options from the body JSON for root questions
+    def parseRootQuestionOptions(item: Map[String, AnyRef]): List[Map[String, Any]] = {
       val bodyStr = getString(item, "body")
       if (bodyStr.nonEmpty) {
         try {
           val bodyJson = parse(bodyStr)
-          val questionText = (bodyJson \ "data" \ "data" \ "question" \ "text").extract[String]
-          val options = parseAndFormatOptions(item)
-          val questionData = Map(
-            "question" -> Map("text" -> questionText, "image" -> "", "audio" -> "", "audioName" -> "", "hint" -> ""),
-            "options" -> options,
-            "questionCount" -> 0,
-            "media" -> List.empty
-          )
-          compact(render(Extraction.decompose(questionData)))
-        } catch { case _: Exception => "" }
-      } else ""
+          val options = (bodyJson \ "data" \ "data" \ "options").extract[List[Map[String, Any]]]
+          options.zipWithIndex.map { case (opt, idx) =>
+            val text = opt.getOrElse("text", "").toString
+            val styledText = text.replace("<p>", "<p style='font-size:1.285em;'>")
+            Map(
+              "text" -> styledText,
+              "image" -> opt.getOrElse("image", ""),
+              "audio" -> opt.getOrElse("audio", ""),
+              "audioName" -> opt.getOrElse("audioName", ""),
+              "hint" -> opt.getOrElse("hint", ""),
+              "isCorrect" -> opt.getOrElse("isCorrect", false),
+              "$$hashKey" -> opt.getOrElse("$$hashKey", "")
+            )
+          }
+        } catch { case _: Exception => Nil }
+      } else Nil
     }
+
 
     // Styled question data for root org.ekstep.question array
     def buildStyledRootQuestionData(item: Map[String, AnyRef]): String = {
@@ -122,29 +91,22 @@ object ECMLBodyBuilder {
       if (bodyStr.nonEmpty) {
         try {
           val bodyJson = parse(bodyStr)
-          val questionText = (bodyJson \ "data" \ "data" \ "question" \ "text").extract[String]
-          val options = parseAndFormatOptions(item)
-          
-          // Apply style to question and options
-          val styledOptions = options.map { option =>
-            val text = option("text").toString
-            val styledText = text.replace("<p>", "<p style='font-size:1.285em;'>")
-            option.updated("text", styledText)
-          }
-          
+          val questionObj = (bodyJson \ "data" \ "data" \ "question").extract[Map[String, Any]]
+          val options = parseRootQuestionOptions(item)
+
+          // Apply style to question text
+          val questionText = questionObj.getOrElse("text", "").toString
+          val styledQuestionText = questionText.replace("<p>", "<p style='font-size:1.285em;'>")
+
+          val styledQuestion = questionObj.updated("text", styledQuestionText)
+
           val questionData = Map(
-            "question" -> Map(
-              "text" -> s"<p style='font-size:1.285em;'>$questionText</p>", 
-              "image" -> "", 
-              "audio" -> "", 
-              "audioName" -> "", 
-              "hint" -> ""
-            ),
-            "options" -> styledOptions,
+            "question" -> styledQuestion,
+            "options" -> options,
             "questionCount" -> 0,
             "media" -> List.empty
           )
-          
+
           compact(render(Extraction.decompose(questionData)))
         } catch { case _: Exception => "" }
       } else ""
@@ -171,7 +133,7 @@ object ECMLBodyBuilder {
           val qlevel = (metadataJson \ "qlevel").extractOpt[String].getOrElse(getString(item, "qlevel", "")).toUpperCase
           val category = (metadataJson \ "category").extractOpt[String].getOrElse(getString(item, "category", "MCQ"))
           val observableElement = (metadataJson \ "observableElement").extractOpt[List[String]].getOrElse(toStrList(item.getOrElse("observableElement", List.empty)))
-          
+
           val metadataFields: List[JField] = List(
             JField("max_score", JInt(BigInt(maxScore))),
             JField("isShuffleOption", JBool(isShuffleOption)),
@@ -185,7 +147,7 @@ object ECMLBodyBuilder {
             JField("category", JString(category)),
             JField("observableElement", Extraction.decompose(observableElement))
           )
-          
+
           val configFields: List[JField] = List(
             JField("metadata", JObject(metadataFields)),
             JField("max_time", JInt(BigInt((configJson \ "max_time").extractOpt[Int].getOrElse(0)))),
@@ -325,7 +287,7 @@ object ECMLBodyBuilder {
       JObject(List(JField("id", JString("org.ekstep.summary_template_js")), JField("plugin", JString("org.ekstep.summary")), JField("src", JString("/content-plugins/org.ekstep.summary-1.0/renderer/summary-template.js")), JField("type", JString("js")), JField("ver", JString("1.0")))),
       JObject(List(JField("id", JString("org.ekstep.summary_template_css")), JField("plugin", JString("org.ekstep.summary")), JField("src", JString("/content-plugins/org.ekstep.summary-1.0/renderer/style.css")), JField("type", JString("css")), JField("ver", JString("1.0")))),
       JObject(List(JField("id", JString("org.ekstep.summary")), JField("plugin", JString("org.ekstep.summary")), JField("src", JString("/content-plugins/org.ekstep.summary-1.0/renderer/plugin.js")), JField("type", JString("plugin")), JField("ver", JString("1.0")))),
-      JObject(List(JField("id", JString("org.ekstep.summary_manifest")), JField("plugin", JString("org.ekstep.summary")), JField("src", JString("/content-plugins/org.ekstep.summary-1.0/renderer/manifest.json")), JField("type", JString("json")), JField("ver", JString("1.0")))),
+      JObject(List(JField("id", JString("org.ekstep.summary_manifest")), JField("plugin", JString("org.ekstep.summary")), JField("src", JString("/content-plugins/org.ekstep.summary-1.0/manifest.json")), JField("type", JString("json")), JField("ver", JString("1.0")))),
       JObject(List(JField("assetId", JString("summaryImage")), JField("id", JString("org.ekstep.summary_summaryImage")), JField("preload", JBool(true)), JField("src", JString("/content-plugins/org.ekstep.summary-1.0/assets/summary-icon.jpg")), JField("type", JString("image")))),
       JObject(List(JField("id", JString("QuizImage")), JField("src", JString("/content-plugins/org.ekstep.questionset-1.0/editor/assets/quizimage.png")), JField("assetId", JString("QuizImage")), JField("type", JString("image")), JField("preload", JBool(true))))
     )
