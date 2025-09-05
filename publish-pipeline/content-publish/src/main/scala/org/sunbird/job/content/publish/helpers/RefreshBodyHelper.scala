@@ -10,7 +10,6 @@ class RefreshBodyHelper(config: ContentPublishConfig, httpUtil: HttpUtil, cassan
 
   private[this] val logger = LoggerFactory.getLogger(classOf[RefreshBodyHelper])
 
-  // Parse difficultyRate string to Map (keys normalized to lowercase)
   def parseDifficultyRate(contentMeta: Map[String, AnyRef]): Map[String, Int] = {
     logger.info(s"parseDifficultyRate :: input contentMeta keys=${contentMeta.keys}")
     val difficultyRateStr = contentMeta.get("difficultyRate").map(_.toString).getOrElse("{}")
@@ -23,33 +22,30 @@ class RefreshBodyHelper(config: ContentPublishConfig, httpUtil: HttpUtil, cassan
     }
   }
 
-  // Compute counts for each difficulty using multiplier
   def computeCounts(difficultyRate: Map[String, Int], difficultyMultiplier: Int): (Int, Int, Int) = {
     logger.info(s"computeCounts :: difficultyRate=$difficultyRate, multiplier=$difficultyMultiplier")
     val easy = difficultyRate.getOrElse("easy", 0) * difficultyMultiplier
     val medium = difficultyRate.getOrElse("medium", 0) * difficultyMultiplier
-    val hard = difficultyRate.getOrElse("difficult", 0) * difficultyMultiplier
-    logger.info(s"computeCounts :: easy=$easy, medium=$medium, hard=$hard")
-    (easy, medium, hard)
+    val difficult = difficultyRate.getOrElse("difficult", 0) * difficultyMultiplier
+    logger.info(s"computeCounts :: easy=$easy, medium=$medium, hard=$difficult")
+    (easy, medium, difficult)
   }
 
-  // Fetch random identifiers for each difficulty level, applying observableElements filter
-  def fetchRandomIdsForLevels(easyCount: Int, mediumCount: Int, hardCount: Int, observableElements: List[String]): (List[String], List[String], List[String]) = {
-    logger.info(s"fetchRandomIdsForLevels :: requested counts easy=$easyCount, medium=$mediumCount, hard=$hardCount, observables=$observableElements")
+  def fetchRandomIdsForLevels(easyCount: Int, mediumCount: Int, difficultCount: Int, observableElements: List[String]): (List[String], List[String], List[String]) = {
+    logger.info(s"fetchRandomIdsForLevels :: requested counts easy=$easyCount, medium=$mediumCount, difficult=$difficultCount, observables=$observableElements")
     val easyIdentifiers = getIdentifiersForQlevel("EASY", observableElements)
     val mediumIdentifiers = getIdentifiersForQlevel("MEDIUM", observableElements)
-    val hardIdentifiers = getIdentifiersForQlevel("DIFFICULT", observableElements)
+    val difficultIdentifiers = getIdentifiersForQlevel("DIFFICULT", observableElements)
 
     val randomEasyIds = pickRandomIdentifiers(easyIdentifiers, easyCount)
     val randomMediumIds = pickRandomIdentifiers(mediumIdentifiers, mediumCount)
-    val randomHardIds = pickRandomIdentifiers(hardIdentifiers, hardCount)
+    val randomdifficultIds = pickRandomIdentifiers(difficultIdentifiers, difficultCount)
 
-    logger.info(s"fetchRandomIdsForLevels :: candidates sizes easy=${easyIdentifiers.size}, medium=${mediumIdentifiers.size}, hard=${hardIdentifiers.size}")
-    logger.info(s"fetchRandomIdsForLevels :: selected easy=$randomEasyIds, medium=$randomMediumIds, hard=$randomHardIds")
-    (randomEasyIds, randomMediumIds, randomHardIds)
+    logger.info(s"fetchRandomIdsForLevels :: candidates sizes easy=${easyIdentifiers.size}, medium=${mediumIdentifiers.size}, difficult=${difficultIdentifiers.size}")
+    logger.info(s"fetchRandomIdsForLevels :: selected easy=$randomEasyIds, medium=$randomMediumIds, difficult=$randomdifficultIds")
+    (randomEasyIds, randomMediumIds, randomdifficultIds)
   }
 
-  // Helper: get identifiers for a qlevel with optional observableElements filter
   def getIdentifiersForQlevel(qlevel: String, observableElements: List[String]): List[String] = {
     logger.info(s"getIdentifiersForQlevel :: qlevel=$qlevel, observableElements=$observableElements")
     try {
@@ -61,6 +57,7 @@ class RefreshBodyHelper(config: ContentPublishConfig, httpUtil: HttpUtil, cassan
           put("filters", new java.util.HashMap[String, AnyRef]() {
             put("status", new util.ArrayList[String]() {{ add("Live") }})
             put("objectType", "AssessmentItem")
+            put("type", "mcq")
             put("qlevel", qlevel.toUpperCase)
             put("observableElement", obsList)
           })

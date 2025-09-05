@@ -14,7 +14,6 @@ object ECMLBodyBuilder {
     val defaultIsShuffleOption: Boolean = config.defaultIsShuffleOption
     val defaultIsPartialScore: Boolean = config.defaultIsPartialScore
 
-    // Helper functions
     def getString(m: Map[String, AnyRef], key: String, default: String = ""): String = m.get(key).map(_.toString).getOrElse(default)
     def getInt(m: Map[String, AnyRef], key: String, default: Int = 0): Int = m.get(key).map {
       case i: java.lang.Integer => i.intValue()
@@ -33,7 +32,6 @@ object ECMLBodyBuilder {
     }
     def extractTitle(item: Map[String, AnyRef]): String = getString(item, "title", getString(item, "name", "")).trim
 
-    // Parse raw item level options from the body JSON and convert to expected format
     def parseRawItemOptions(item: Map[String, AnyRef]): List[Map[String, Any]] = {
       val bodyStr = getString(item, "body")
       if (bodyStr.nonEmpty) {
@@ -60,7 +58,6 @@ object ECMLBodyBuilder {
       } else Nil
     }
 
-    // Parse raw item level options from the body JSON for root questions
     def parseRootQuestionOptions(item: Map[String, AnyRef]): List[Map[String, Any]] = {
       val bodyStr = getString(item, "body")
       if (bodyStr.nonEmpty) {
@@ -84,8 +81,6 @@ object ECMLBodyBuilder {
       } else Nil
     }
 
-
-    // Styled question data for root org.ekstep.question array
     def buildStyledRootQuestionData(item: Map[String, AnyRef]): String = {
       val bodyStr = getString(item, "body")
       if (bodyStr.nonEmpty) {
@@ -112,7 +107,6 @@ object ECMLBodyBuilder {
       } else ""
     }
 
-    // Build config metadata from body JSON
     def buildConfigData(item: Map[String, AnyRef]): String = {
       val bodyStr = getString(item, "body")
       if (bodyStr.nonEmpty) {
@@ -163,7 +157,6 @@ object ECMLBodyBuilder {
       } else ""
     }
 
-    // Build full question body - return the body field as-is since it contains the complete structure
     def buildQuestionBody(item: Map[String, AnyRef]): String = {
       getString(item, "body")
     }
@@ -172,7 +165,6 @@ object ECMLBodyBuilder {
     val totalMaxScore = items.map(getInt(_, "max_score", 1)).sum
     val questionSetId = UUID.randomUUID().toString
 
-    // Build questionset data array items
     val questionSetDataArray = items.map { item =>
       val title = extractTitle(item)
       val parsedOptions = parseRawItemOptions(item) match {
@@ -220,7 +212,6 @@ object ECMLBodyBuilder {
       ))
     }
 
-    // Root level org.ekstep.question array entries
     val rootQuestions = items.map { item =>
       val id = getString(item, "identifier", UUID.randomUUID().toString)
       val qType = getString(item, "type", "mcq")
@@ -302,7 +293,6 @@ object ECMLBodyBuilder {
       JObject(List(JField("depends", JString("")), JField("id", JString("org.ekstep.summary")), JField("type", JString("plugin")), JField("ver", JString("1.0"))))
     )))))
 
-    // Main stage (ordered)
     val mainStage = JObject(List(
       JField("x", JInt(0)),
       JField("y", JInt(0)),
