@@ -59,7 +59,7 @@ class RefreshBodyHelper(config: ContentPublishConfig, httpUtil: HttpUtil, cassan
             put("objectType", "AssessmentItem")
             put("type", "mcq")
             put("qlevel", qlevel.toUpperCase)
-            put("observableElement", obsList)
+            put("observableElementIds", obsList)
           })
           put("fields", new util.ArrayList[String]() {{ add("identifier"); add("qlevel") }})
           put("limit", Int.box(1000))
@@ -85,7 +85,7 @@ class RefreshBodyHelper(config: ContentPublishConfig, httpUtil: HttpUtil, cassan
       } else List.empty[String]
     } catch {
       case e: Exception =>
-        logger.error(s"getIdentifiersForQlevel :: exception for qlevel=$qlevel", e)
+        logger.info(s"getIdentifiersForQlevel :: exception for qlevel=$qlevel", e)
         List.empty[String]
     }
   }
@@ -116,12 +116,12 @@ class RefreshBodyHelper(config: ContentPublishConfig, httpUtil: HttpUtil, cassan
                 None
               }
             } else {
-              logger.error(s"getItemsByIdentifiers :: failed to fetch item for identifier=$identifier, status=${httpResponse.status}")
+              logger.info(s"getItemsByIdentifiers :: failed to fetch item for identifier=$identifier, status=${httpResponse.status}")
               None
             }
           } catch {
             case e: Exception =>
-              logger.error(s"getItemsByIdentifiers :: exception fetching identifier=$identifier", e)
+              logger.info(s"getItemsByIdentifiers :: exception fetching identifier=$identifier", e)
               None
           }
         }
@@ -129,7 +129,7 @@ class RefreshBodyHelper(config: ContentPublishConfig, httpUtil: HttpUtil, cassan
         items
       } catch {
         case e: Exception =>
-          logger.error(s"getItemsByIdentifiers :: exception for ids=${identifiers}", e)
+          logger.info(s"getItemsByIdentifiers :: exception for ids=${identifiers}", e)
           List.empty[Map[String, AnyRef]]
       }
     }
@@ -163,8 +163,18 @@ class RefreshBodyHelper(config: ContentPublishConfig, httpUtil: HttpUtil, cassan
       content
     } catch {
       case e: Exception =>
-        logger.error(s"getContentMetaData :: exception fetching id=$identifier", e)
+        logger.info(s"getContentMetaData :: exception fetching id=$identifier", e)
         Map.empty[String, AnyRef]
+    }
+  }
+
+  def validate(level: String, got: Int, required: Int, identifier: String): Boolean = {
+    if (required > 0 && got < required) {
+      val errorMsg = s"Insufficient $level identifiers: required $required, got $got"
+      logger.error(s"RefreshBodyHelper :: $errorMsg for identifier=${identifier}")
+      false
+    } else {
+      true
     }
   }
 }

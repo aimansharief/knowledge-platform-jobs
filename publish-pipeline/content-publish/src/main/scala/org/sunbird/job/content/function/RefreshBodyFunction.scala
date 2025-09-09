@@ -55,7 +55,7 @@ class RefreshBodyFunction(config: ContentPublishConfig) extends BaseProcessFunct
       val (easyCount, mediumCount, difficultCount) = helper.computeCounts(difficultyRate, config.difficultyMultiplier)
       logger.info(s"processElement :: computed counts easy=$easyCount, medium=$mediumCount, difficult=$difficultCount")
 
-      val observableElements = contentMeta.getOrElse("se_observableElements", List.empty[String]).asInstanceOf[List[String]]
+      val observableElements = contentMeta.getOrElse("observableElementIds", List.empty[String]).asInstanceOf[List[String]]
       logger.info(s"processElement :: observableElements=$observableElements")
 
       val (randomEasyIds, randomMediumIds, randomDifficultIds) = helper.fetchRandomIdsForLevels(easyCount, mediumCount, difficultCount, observableElements)
@@ -64,31 +64,39 @@ class RefreshBodyFunction(config: ContentPublishConfig) extends BaseProcessFunct
       logger.info(s"RefreshBodyFunction :: MEDIUM identifiers: $randomMediumIds")
       logger.info(s"RefreshBodyFunction :: DIFFICULT identifiers: $randomDifficultIds")
 
-      if (randomEasyIds.size < originalEasy) {
-        val errorMsg = s"Insufficient EASY identifiers: required $originalEasy, got ${randomEasyIds.size}"
-        logger.error(s"RefreshBodyFunction :: $errorMsg for identifier=${event.identifier}")
-        throw new RuntimeException(errorMsg)
-      }
-      if (randomMediumIds.size < originalMedium) {
-        val errorMsg = s"Insufficient MEDIUM identifiers: required $originalMedium, got ${randomMediumIds.size}"
-        logger.error(s"RefreshBodyFunction :: $errorMsg for identifier=${event.identifier}")
-        throw new RuntimeException(errorMsg)
-      }
-      if (randomDifficultIds.size < originalDifficult) {
-        val errorMsg = s"Insufficient DIFFICULT identifiers: required $originalDifficult, got ${randomDifficultIds.size}"
-        logger.error(s"RefreshBodyFunction :: $errorMsg for identifier=${event.identifier}")
-        throw new RuntimeException(errorMsg)
-      }
+      val uniqueEasyIds = randomEasyIds.distinct
+      val uniqueMediumIds = randomMediumIds.distinct
+      val uniqueDifficultIds = randomDifficultIds.distinct
 
-      val allIds = (randomEasyIds ++ randomMediumIds ++ randomDifficultIds).distinct
-      logger.info(s"processElement :: total selected ids count=${allIds.size}")
+      logger.info(s"RefreshBodyFunction :: UNIQUE counts => EASY=${uniqueEasyIds.size}, MEDIUM=${uniqueMediumIds.size}, DIFFICULT=${uniqueDifficultIds.size}")
+      logger.info(s"RefreshBodyFunction :: REQUIRED minimums => EASY=$originalEasy, MEDIUM=$originalMedium, DIFFICULT=$originalDifficult")
 
-      val items = if (allIds.isEmpty) List.empty[Map[String, AnyRef]] else helper.getItemsByIdentifiers(allIds)
-      logger.info(s"processElement :: fetched items count=${items.size}")
+      // Debug logging for validation inputs
+      logger.info(s"RefreshBodyFunction :: Validation inputs - EASY: got=${uniqueEasyIds.size}, required=$originalEasy")
+      logger.info(s"RefreshBodyFunction :: Validation inputs - MEDIUM: got=${uniqueMediumIds.size}, required=$originalMedium")
+      logger.info(s"RefreshBodyFunction :: Validation inputs - DIFFICULT: got=${uniqueDifficultIds.size}, required=$originalDifficult")
 
-      val updatedBody = helper.buildUpdatedBody(contentMeta, items)
-      logger.info(s"RefreshBodyFunction :: built updated body for identifier=${event.identifier}")
-      helper.updateContentBody(event.identifier,updatedBody)
+      val easyValid = helper.validate("EASY", uniqueEasyIds.size, originalEasy, event.identifier)
+      val mediumValid = helper.validate("MEDIUM", uniqueMediumIds.size, originalMedium, event.identifier)
+      val difficultValid = helper.validate("DIFFICULT", uniqueDifficultIds.size, originalDifficult, event.identifier)
+
+      logger.info(s"RefreshBodyFunction :: Validation results - EASY=$easyValid, MEDIUM=$mediumValid, DIFFICULT=$difficultValid")
+
+      if (easyValid && mediumValid && difficultValid) {
+        val allIds = (uniqueEasyIds ++ uniqueMediumIds ++ uniqueDifficultIds).distinct
+        logger.info(s"processElement :: total selected ids count=${allIds.size}")
+
+        val items = if (allIds.isEmpty) List.empty[Map[String, AnyRef]] else helper.getItemsByIdentifiers(allIds)
+        logger.info(s"processElement :: fetched items count=${items.size}")
+
+        val updatedBody = helper.buildUpdatedBody(contentMeta, items)
+        logger.info(s"RefreshBodyFunction :: built updated body for identifier=${event.identifier}")
+        helper.updateContentBody(event.identifier,updatedBody)
+      } else {
+        logger.info(s"RefreshBodyFunction :: Validation failed for identifier=${event.identifier}, skipping processing")
+        metrics.incCounter(config.skippedEventCount)
+        return
+      }
     } catch {
       case e: Exception =>
         logger.error("RefreshBodyFunction :: processElement :: Exception", e)
