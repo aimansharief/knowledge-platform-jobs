@@ -6,7 +6,7 @@ import org.apache.flink.api.java.typeutils.TypeExtractor
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.sunbird.job.connector.FlinkKafkaConnector
-import org.sunbird.job.content.function.{CollectionPublishFunction, ContentPublishFunction, PublishEventRouter}
+import org.sunbird.job.content.function.{CollectionPublishFunction, ContentPublishFunction, PublishEventRouter, RefreshBodyFunction}
 import org.sunbird.job.content.publish.domain.Event
 import org.sunbird.job.util.{FlinkUtil, HttpUtil}
 
@@ -36,8 +36,17 @@ class ContentPublishStreamTask(config: ContentPublishConfig, kafkaConnector: Fli
     contentPublish.getSideOutput(config.mvcProcessorTag).addSink(kafkaConnector.kafkaStringSink(config.mvcTopic))
     contentPublish.getSideOutput(config.failedEventOutTag).addSink(kafkaConnector.kafkaStringSink(config.kafkaErrorTopic))
 
-   val collectionPublish = processStreamTask.getSideOutput(config.collectionPublishOutTag).process(new CollectionPublishFunction(config, httpUtil))
-    		  .name("collection-publish-process").uid("collection-publish-process").setParallelism(1)
+    // Refresh Body processing: route refresh-body events to RefreshBodyFunction
+    val refreshBody = processStreamTask.getSideOutput(config.refreshBodyOutTag).process(new RefreshBodyFunction(config))
+      .name("refresh-body-process").uid("refresh-body-process").setParallelism(1)
+
+    // On success publish the result to refresh body topic defined in config
+    refreshBody.addSink(kafkaConnector.kafkaStringSink(config.refreshBodyTopic))
+    // Route failures to failed events topic
+    refreshBody.getSideOutput(config.failedEventOutTag).addSink(kafkaConnector.kafkaStringSink(config.kafkaErrorTopic))
+
+    val collectionPublish = processStreamTask.getSideOutput(config.collectionPublishOutTag).process(new CollectionPublishFunction(config, httpUtil))
+      .name("collection-publish-process").uid("collection-publish-process").setParallelism(1)
     collectionPublish.getSideOutput(config.generatePostPublishProcessTag).addSink(kafkaConnector.kafkaStringSink(config.postPublishTopic))
     collectionPublish.getSideOutput(config.failedEventOutTag).addSink(kafkaConnector.kafkaStringSink(config.kafkaErrorTopic))
 
