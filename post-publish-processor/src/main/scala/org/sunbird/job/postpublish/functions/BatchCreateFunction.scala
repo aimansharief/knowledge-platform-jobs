@@ -27,7 +27,7 @@ class BatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUtil
   override def processElement(eData: java.util.Map[String, AnyRef], context: ProcessFunction[java.util.Map[String, AnyRef], String]#Context, metrics: Metrics): Unit = {
     val collectionId = eData.getOrDefault("identifier", "")
     metrics.incCounter(config.batchCreationCount)
-    val startDate = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val startDate = ZonedDateTime.now(ZoneId.of(config.timezone)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     logger.info("Creating Batch for " + collectionId + " with start date:" + startDate)
     try {
       createBatch(eData, startDate)(config, httpUtil)

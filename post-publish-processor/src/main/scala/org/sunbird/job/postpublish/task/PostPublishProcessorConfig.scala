@@ -94,4 +94,10 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
   // Competency Framework Batch Creation Categories
   val CFBatchCategories: util.List[String] = if (config.hasPath("cf_batch_create.primaryCategories")) config.getStringList("cf_batch_create.primaryCategories") else util.Arrays.asList("Competency Framework")
 
+  // Activity Batch Creation Configuration
+  val activityBatchCreationEnabled: Boolean = if (config.hasPath("activity.batch.creation.enabled")) config.getBoolean("activity.batch.creation.enabled") else false
+
+  // Timezone Configuration
+  val timezone: String = if (config.hasPath("job.timezone")) config.getString("job.timezone") else "Asia/Kolkata"
+
 }

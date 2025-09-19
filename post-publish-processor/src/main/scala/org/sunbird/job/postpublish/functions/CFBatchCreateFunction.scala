@@ -27,7 +27,7 @@ class CFBatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUt
   override def processElement(eData: java.util.Map[String, AnyRef], context: ProcessFunction[java.util.Map[String, AnyRef], String]#Context, metrics: Metrics): Unit = {
     val activityId = eData.getOrDefault("identifier", "")
     metrics.incCounter(config.CFBatchCreationCount)
-    val startDate = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val startDate = ZonedDateTime.now(ZoneId.of(config.timezone)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     logger.info("Creating Competency Framework Batch for " + activityId + " with start date:" + startDate)
     try {
       createCFBatch(eData, startDate)(config, httpUtil)
