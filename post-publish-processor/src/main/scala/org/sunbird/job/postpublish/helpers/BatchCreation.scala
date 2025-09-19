@@ -100,8 +100,8 @@ trait BatchCreation {
     }
   }
 
-  // Competency Framework Batch Creation Methods
-  def createCFBatch(eData: java.util.Map[String, AnyRef], startDate: String)(implicit config: PostPublishProcessorConfig, httpUtil: HttpUtil) = {
+  // Activity Batch Creation Methods
+  def createActivityBatch(eData: java.util.Map[String, AnyRef], startDate: String)(implicit config: PostPublishProcessorConfig, httpUtil: HttpUtil) = {
     val request = new java.util.HashMap[String, AnyRef]() {
       {
         put("request", new java.util.HashMap[String, AnyRef]() {
@@ -122,34 +122,34 @@ trait BatchCreation {
       }
     }
     val httpRequest = JSONUtil.serialize(request)
-    val httpResponse = httpUtil.post(config.CFBatchCreateAPIPath, httpRequest)
+    val httpResponse = httpUtil.post(config.activityBatchCreateAPIPath, httpRequest)
     if (httpResponse.status == 200) {
-      logger.info("Competency Framework Batch create success: " + httpResponse.body)
+      logger.info("Activity Batch create success: " + httpResponse.body)
     } else {
-      logger.error("Competency Framework Batch create failed: " + httpResponse.status + " :: " + httpResponse.body)
-      throw new Exception("Competency Framework Batch creation failed for " + eData.get("identifier"))
+      logger.error("Activity Batch create failed: " + httpResponse.status + " :: " + httpResponse.body)
+      throw new Exception("Activity Batch creation failed for " + eData.get("identifier"))
     }
   }
 
-  def isCompetencyFramework(metadata: java.util.Map[String, AnyRef])(implicit config: PostPublishProcessorConfig): Boolean = {
+  def isActivityBatchEligible(metadata: java.util.Map[String, AnyRef])(implicit config: PostPublishProcessorConfig): Boolean = {
     if (MapUtils.isNotEmpty(metadata)) {
       val primaryCategory = metadata.getOrDefault("primaryCategory", "").asInstanceOf[String]
-      val isCF = config.CFBatchCategories.asScala.exists(category => 
+      val isEligible = config.activityBatchCategories.asScala.exists(category => 
         StringUtils.equalsIgnoreCase(primaryCategory, category))
-      logger.info("Is Competency Framework Batch eligible: " + isCF + " for primaryCategory: " + primaryCategory + ", configured categories: " + config.CFBatchCategories)
-      isCF
+      logger.info("Is Activity Batch eligible: " + isEligible + " for primaryCategory: " + primaryCategory + ", configured categories: " + config.activityBatchCategories)
+      isEligible
     } else {
-      logger.warn("Metadata is empty, cannot determine if it's Competency Framework Batch eligible")
+      logger.warn("Metadata is empty, cannot determine if it's Activity Batch eligible")
       false
     }
   }
 
-  def getCFBatchDetails(identifier: String)(implicit neo4JUtil: Neo4JUtil, config: PostPublishProcessorConfig): util.Map[String, AnyRef] = {
-    logger.info("Process Competency Framework Batch Creation for content: " + identifier)
+  def getActivityBatchDetails(identifier: String)(implicit neo4JUtil: Neo4JUtil, config: PostPublishProcessorConfig): util.Map[String, AnyRef] = {
+    logger.info("Process Activity Batch Creation for content: " + identifier)
     val metadata = neo4JUtil.getNodeProperties(identifier)
 
-    // Check if it's a Competency Framework
-    if (isCompetencyFramework(metadata)(config)) {
+    // Check if it's Activity Batch eligible
+    if (isActivityBatchEligible(metadata)(config)) {
       val createdFor = metadata.get("createdFor").asInstanceOf[java.util.List[String]]
       new util.HashMap[String, AnyRef]() {
         {

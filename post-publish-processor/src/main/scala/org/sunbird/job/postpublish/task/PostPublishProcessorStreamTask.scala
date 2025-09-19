@@ -34,10 +34,10 @@ class PostPublishProcessorStreamTask(config: PostPublishProcessorConfig, kafkaCo
     processStreamTask.getSideOutput(config.batchCreateOutTag).process(new BatchCreateFunction(config, httpUtil))
       .name("batch-create-process").uid("batch-create-process").setParallelism(config.batchCreateParallelism)
 
-    // Process CF Batch Creation only if enabled
+    // Process Activity Batch Creation only if enabled
     if (config.activityBatchCreationEnabled) {
-      processStreamTask.getSideOutput(config.CFBatchCreateOutTag).process(new CFBatchCreateFunction(config, httpUtil))
-        .name("cf-batch-create-process").uid("cf-batch-create-process").setParallelism(config.CFBatchCreateParallelism)
+      processStreamTask.getSideOutput(config.activityBatchCreateOutTag).process(new ActivityBatchCreateFunction(config, httpUtil))
+        .name("activity-batch-create-process").uid("activity-batch-create-process").setParallelism(config.activityBatchCreateParallelism)
     }
 
     val shallowCopyPublishStream = processStreamTask.getSideOutput(config.shallowContentPublishOutTag)

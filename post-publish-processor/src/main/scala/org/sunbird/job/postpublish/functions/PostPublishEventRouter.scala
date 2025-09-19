@@ -48,11 +48,11 @@ class PostPublishEventRouter(config: PostPublishProcessorConfig, httpUtil: HttpU
       if (!batchDetails.isEmpty)
         context.output(config.batchCreateOutTag, batchDetails)
 
-      // Process Competency Framework Batch Creation (only if enabled)
+      // Process Activity Batch Creation (only if enabled)
       if (config.activityBatchCreationEnabled) {
-        val cfBatchDetails = getCFBatchDetails(identifier)(neo4JUtil, config)
-        if (!cfBatchDetails.isEmpty)
-          context.output(config.CFBatchCreateOutTag, cfBatchDetails)
+        val activityBatchDetails = getActivityBatchDetails(identifier)(neo4JUtil, config)
+        if (!activityBatchDetails.isEmpty)
+          context.output(config.activityBatchCreateOutTag, activityBatchDetails)
       }
 
       // Process Dialcode link
