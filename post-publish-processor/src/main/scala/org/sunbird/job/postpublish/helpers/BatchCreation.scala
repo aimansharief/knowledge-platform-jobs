@@ -107,7 +107,7 @@ trait BatchCreation {
         put("request", new java.util.HashMap[String, AnyRef]() {
           {
             put("activityId", eData.get("identifier"))
-            put("activityType", "CF")
+            put("activityType", eData.get("primaryCategory"))
             put("name", eData.get("name"))
             put("description", eData.getOrDefault("description", ""))
             put("enrollmentType", "open")
@@ -157,6 +157,7 @@ trait BatchCreation {
           put("name", metadata.get("name"))
           put("description", metadata.getOrDefault("description", ""))
           put("createdBy", metadata.get("createdBy"))
+          put("primaryCategory", metadata.get("primaryCategory"))
           if (CollectionUtils.isNotEmpty(createdFor))
             put("createdFor", new util.ArrayList[String](createdFor))
         }
