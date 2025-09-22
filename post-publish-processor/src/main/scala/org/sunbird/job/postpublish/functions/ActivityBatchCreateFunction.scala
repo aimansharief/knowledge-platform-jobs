@@ -11,10 +11,10 @@ import org.sunbird.job.{BaseProcessFunction, Metrics}
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
 
-class BatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUtil)
+class ActivityBatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUtil)
   extends BaseProcessFunction[java.util.Map[String, AnyRef], String](config) with BatchCreation {
 
-  private[this] val logger = LoggerFactory.getLogger(classOf[BatchCreateFunction])
+  private[this] val logger = LoggerFactory.getLogger(classOf[ActivityBatchCreateFunction])
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
@@ -25,24 +25,24 @@ class BatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUtil
   }
 
   override def processElement(eData: java.util.Map[String, AnyRef], context: ProcessFunction[java.util.Map[String, AnyRef], String]#Context, metrics: Metrics): Unit = {
-    val collectionId = eData.getOrDefault("identifier", "")
-    metrics.incCounter(config.batchCreationCount)
+    val activityId = eData.getOrDefault("identifier", "")
+    metrics.incCounter(config.activityBatchCreationCount)
     val startDate = ZonedDateTime.now(ZoneId.of(config.timezone)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    logger.info("Creating Batch for " + collectionId + " with start date:" + startDate)
+    logger.info("Creating Activity Batch for " + activityId + " with start date:" + startDate)
     try {
-      createBatch(eData, startDate)(config, httpUtil)
-      metrics.incCounter(config.batchCreationSuccessCount)
-      logger.info("Batch created for " + collectionId)
+      createActivityBatch(eData, startDate)(config, httpUtil)
+      metrics.incCounter(config.activityBatchCreationSuccessCount)
+      logger.info("Activity Batch created for " + activityId)
     } catch {
       case ex: Throwable =>
-        logger.error(s"Error while processing message for identifier : ${collectionId}.", ex)
-        metrics.incCounter(config.batchCreationFailedCount)
+        logger.error(s"Error while processing Activity batch creation for identifier : ${activityId}.", ex)
+        metrics.incCounter(config.activityBatchCreationFailedCount)
         throw ex
     }
   }
 
   override def metricsList(): List[String] = {
-    List(config.batchCreationCount, config.batchCreationSuccessCount, config.batchCreationFailedCount)
+    List(config.activityBatchCreationCount, config.activityBatchCreationSuccessCount, config.activityBatchCreationFailedCount)
   }
 
 }

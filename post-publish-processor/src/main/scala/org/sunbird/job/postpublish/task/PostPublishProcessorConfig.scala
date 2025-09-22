@@ -30,6 +30,7 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
   val shallowCopyParallelism: Int = config.getInt("task.shallow_copy.parallelism")
   val linkDialCodeParallelism: Int = config.getInt("task.link_dialcode.parallelism")
   val batchCreateParallelism: Int = config.getInt("task.batch_create.parallelism")
+  val activityBatchCreateParallelism: Int = config.getInt("task.activity_batch_create.parallelism")
   val dialcodeContextUpdaterParallelism: Int = config.getInt("task.dialcode_context_updater.parallelism")
 
   // Metric List
@@ -38,6 +39,9 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
   val batchCreationCount = "batch-creation-count"
   val batchCreationSuccessCount = "batch-creation-success-count"
   val batchCreationFailedCount = "batch-creation-failed-count"
+  val activityBatchCreationCount = "activity-batch-creation-count"
+  val activityBatchCreationSuccessCount = "activity-batch-creation-success-count"
+  val activityBatchCreationFailedCount = "activity-batch-creation-failed-count"
   val shallowCopyCount = "shallow-copy-count"
   val dialLinkCount = "dial-link-count"
   val dialLinkSuccessCount = "dial-link-success-count"
@@ -62,6 +66,7 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
 
   // Tags
   val batchCreateOutTag: OutputTag[java.util.Map[String, AnyRef]] = OutputTag[java.util.Map[String, AnyRef]]("batch-create")
+  val activityBatchCreateOutTag: OutputTag[java.util.Map[String, AnyRef]] = OutputTag[java.util.Map[String, AnyRef]]("activity-batch-create")
   val linkDIALCodeOutTag: OutputTag[java.util.Map[String, AnyRef]] = OutputTag[java.util.Map[String, AnyRef]]("dialcode-link")
   val dialcodeContextOutTag: OutputTag[java.util.Map[String, AnyRef]] = OutputTag[java.util.Map[String, AnyRef]]("dialcode-context")
   val shallowContentPublishOutTag: OutputTag[PublishMetadata] = OutputTag[PublishMetadata]("shallow-copied-content-publish")
@@ -77,6 +82,7 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
 
   // API URLs
   val batchCreateAPIPath: String = lmsBaseUrl + "/private/v1/course/batch/create"
+  val activityBatchCreateAPIPath: String = lmsBaseUrl + "/private/v1/batch/create"
   val searchAPIPath: String = searchBaseUrl + "/v3/search"
   val reserveDialCodeAPIPath: String = contentBaseUrl + "/content/v3/dialcode/reserve"
 
@@ -84,5 +90,14 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
   val QRImageGeneratorTopic: String = config.getString("kafka.qrimage.topic")
   val primaryCategories: util.List[String] = if (config.hasPath("dialcode.linkable.primaryCategory")) config.getStringList("dialcode.linkable.primaryCategory") else util.Arrays.asList("Course") //List[String]("Course")
   val dialcodeContextUpdaterTopic: String = config.getString("kafka.dialcode.context.topic")
+
+  // Activity Batch Creation Categories
+  val activityBatchCategories: util.List[String] = if (config.hasPath("activity.batch.creation.primaryCategories")) config.getStringList("activity.batch.creation.primaryCategories") else util.Arrays.asList("Competency Framework")
+
+  // Activity Batch Creation Configuration
+  val activityBatchCreationEnabled: Boolean = if (config.hasPath("activity.batch.creation.enabled")) config.getBoolean("activity.batch.creation.enabled") else false
+
+  // Timezone Configuration
+  val timezone: String = if (config.hasPath("job.timezone")) config.getString("job.timezone") else "Asia/Kolkata"
 
 }
