@@ -154,8 +154,8 @@ trait BatchCreation {
       batchExists
     } catch {
       case e: Exception =>
-        logger.error("Failed to parse 'batches' metadata field.", e)
-        false
+        logger.error("Failed to parse 'batches' metadata field. Skipping batch creation to avoid duplicates.", e)
+        true
     }
   }
 
