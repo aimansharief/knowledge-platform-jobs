@@ -144,12 +144,27 @@ trait BatchCreation {
     }
   }
 
+  def isActivityBatchExists(metadata: java.util.Map[String, AnyRef]): Boolean = {
+    val batchesStr = metadata.get("batches").asInstanceOf[String]
+    if (StringUtils.isBlank(batchesStr)) return false
+    try {
+      val batches = JSONUtil.deserialize[java.util.List[java.util.Map[String, AnyRef]]](batchesStr)
+      val batchExists = CollectionUtils.isNotEmpty(batches)
+      if(batchExists) logger.info("Activity has existing batches. Skipping creation.")
+      batchExists
+    } catch {
+      case e: Exception =>
+        logger.error("Failed to parse 'batches' metadata field.", e)
+        false
+    }
+  }
+
   def getActivityBatchDetails(identifier: String)(implicit neo4JUtil: Neo4JUtil, config: PostPublishProcessorConfig): util.Map[String, AnyRef] = {
     logger.info("Process Activity Batch Creation for content: " + identifier)
     val metadata = neo4JUtil.getNodeProperties(identifier)
 
-    // Check if it's Activity Batch eligible
-    if (isActivityBatchEligible(metadata)(config)) {
+    // Check if it's Activity Batch eligible and no active batch exists
+    if (isActivityBatchEligible(metadata)(config) && !isActivityBatchExists(metadata)) {
       val createdFor = metadata.get("createdFor").asInstanceOf[java.util.List[String]]
       new util.HashMap[String, AnyRef]() {
         {
@@ -163,6 +178,7 @@ trait BatchCreation {
         }
       }
     } else {
+      logger.info("Skipping activity batch creation for " + identifier + " as it is not eligible or an active batch already exists.")
       new util.HashMap[String, AnyRef]()
     }
   }
