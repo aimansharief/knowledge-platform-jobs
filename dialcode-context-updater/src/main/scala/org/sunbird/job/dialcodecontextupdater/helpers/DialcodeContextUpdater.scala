@@ -164,7 +164,7 @@ trait DialcodeContextUpdater {
 
 		val requestUrl = s"${config.searchServiceBaseUrl}/v3/search"
 		logger.info("DialcodeContextUpdater :: searchContent :: Search Content requestUrl: " + requestUrl)
-		logger.info("DialcodeContextUpdater :: searchContent :: Search Content reqMap: " + reqMap)
+		logger.info("DialcodeContextUpdater :: searchContent :: Search Content reqMap: " + JSONUtil.serialize(reqMap))
 		val httpResponse = httpUtil.post(requestUrl, JSONUtil.serialize(reqMap))
 		if (httpResponse.status == 200) {
 			val response = JSONUtil.deserialize[Map[String, AnyRef]](httpResponse.body)
@@ -172,6 +172,7 @@ trait DialcodeContextUpdater {
 			val content = result.getOrElse("content", List[Map[String,AnyRef]]()).asInstanceOf[List[Map[String,AnyRef]]]
 			val collections = result.getOrElse("collections", List[Map[String,AnyRef]]()).asInstanceOf[List[Map[String,AnyRef]]]
 			val count = result.getOrElse("count", 0).asInstanceOf[Int]
+			logger.info("DialcodeContextUpdater :: searchContent :: Search Content response: " + JSONUtil.serialize(response))
 			if(count>0) {
 				if(collections.isEmpty) {
 					content.head
