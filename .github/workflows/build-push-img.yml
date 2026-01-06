@@ -8,7 +8,7 @@ on:
 env:
   CLOUD_STORE_GROUP_ID: ${{ vars.CLOUD_STORE_GROUP_ID || 'org.sunbird' }}
   CLOUD_STORE_ARTIFACT_ID: ${{ vars.CLOUD_STORE_ARTIFACT_ID || 'cloud-store-sdk_2.12' }}
-  CLOUD_STORE_VERSION: ${{ vars.CLOUD_STORE_VERSION || '1.4.6' }}
+  CLOUD_STORE_VERSION: ${{ vars.CLOUD_STORE_VERSION || '1.4.6.3' }}
   
 jobs:
   build-and-push:
