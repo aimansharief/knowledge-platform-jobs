@@ -64,7 +64,12 @@
 	<repositories>
 		<repository>
 			<id>my-local-repo</id>
-		<url>file://${user.home}/.m2/repository</url>
+			<url>file://${user.home}/.m2/repository</url>
+		</repository>
+		<repository>
+			<id>central</id>
+			<name>Maven Central</name>
+			<url>https://repo.maven.apache.org/maven2</url>
 		</repository>
 		<repository>
 			<id>apache-releases</id>
