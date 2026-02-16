@@ -76,7 +76,7 @@ class ElasticSearchUtil(connectionInfo: String, indexName: String, batchSize: In
     try {
       // TODO
       // Replace mapper with JSONUtil once the JSONUtil is fixed
-      val doc = mapper.readValue(document, new TypeReference[util.Map[String, AnyRef]]() {})
+      val doc = ScalaJsonUtil.deserialize[util.Map[String, AnyRef]](document)
       val updatedDoc = checkDocStringLength(doc)
       val response = esClient.index(new IndexRequest(indexName).id(identifier).source(updatedDoc), RequestOptions.DEFAULT)
       logger.info(s"Added ${response.getId} to index ${response.getIndex}")
@@ -91,7 +91,7 @@ class ElasticSearchUtil(connectionInfo: String, indexName: String, batchSize: In
     try {
       // TODO
       // Replace mapper with JSONUtil once the JSONUtil is fixed
-      val doc = mapper.readValue(document, new TypeReference[util.Map[String, AnyRef]]() {})
+      val doc = ScalaJsonUtil.deserialize[util.Map[String, AnyRef]](document)
       val updatedDoc = checkDocStringLength(doc)
       val indexRequest = if(identifier == null) new IndexRequest(indexName) else new IndexRequest(indexName).id(identifier)
       val response = esClient.index(indexRequest.source(updatedDoc), RequestOptions.DEFAULT)
@@ -106,7 +106,7 @@ class ElasticSearchUtil(connectionInfo: String, indexName: String, batchSize: In
     try {
       // TODO
       // Replace mapper with JSONUtil once the JSONUtil is fixed
-      val doc = mapper.readValue(document, new TypeReference[util.Map[String, AnyRef]]() {})
+      val doc = ScalaJsonUtil.deserialize[util.Map[String, AnyRef]](document)
       val updatedDoc = checkDocStringLength(doc)
       val indexRequest = new IndexRequest(indexName).id(identifier).source(updatedDoc)
       val request = new UpdateRequest().index(indexName).id(identifier).doc(updatedDoc).upsert(indexRequest)
@@ -146,7 +146,7 @@ class ElasticSearchUtil(connectionInfo: String, indexName: String, batchSize: In
           count += 1
           val document = ScalaJsonUtil.serialize(jsonObjects(key).asInstanceOf[Map[String, AnyRef]])
           logger.debug("ElasticSearchUtil:: bulkIndexWithIndexId:: document: " + document)
-          val doc: util.Map[String, AnyRef] = mapper.readValue(document, new TypeReference[util.Map[String, AnyRef]]() {})
+          val doc = ScalaJsonUtil.deserialize[util.Map[String, AnyRef]](document)
           val updatedDoc = checkDocStringLength(doc)
           logger.debug("ElasticSearchUtil:: bulkIndexWithIndexId:: doc: " + updatedDoc)
           request.add(new IndexRequest(indexName).id(key).source(updatedDoc))
