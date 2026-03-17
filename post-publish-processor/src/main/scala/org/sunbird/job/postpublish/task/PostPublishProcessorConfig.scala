@@ -72,16 +72,18 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
   val searchBaseUrl: String = config.getString("service.search.basePath")
   val lmsBaseUrl: String = config.getString("service.lms.basePath")
   val learningBaseUrl: String = config.getString("service.learning_service.basePath")
+  val contentBaseUrl: String = config.getString("service.content.basePath")
   val dialBaseUrl: String = config.getString("service.dial.basePath")
 
   // API URLs
   val batchCreateAPIPath: String = lmsBaseUrl + "/private/v1/course/batch/create"
   val searchAPIPath: String = searchBaseUrl + "/v3/search"
-  val reserveDialCodeAPIPath: String = learningBaseUrl + "/content/v3/dialcode/reserve"
+  val reserveDialCodeAPIPath: String = contentBaseUrl + "/content/v3/dialcode/reserve"
 
   // QR Image Generator
   val QRImageGeneratorTopic: String = config.getString("kafka.qrimage.topic")
   val primaryCategories: util.List[String] = if (config.hasPath("dialcode.linkable.primaryCategory")) config.getStringList("dialcode.linkable.primaryCategory") else util.Arrays.asList("Course") //List[String]("Course")
   val dialcodeContextUpdaterTopic: String = config.getString("kafka.dialcode.context.topic")
+  val dialStorageContainer: String = if (config.hasPath("dialcode.storage.container")) config.getString("dialcode.storage.container") else "dial"
 
 }
