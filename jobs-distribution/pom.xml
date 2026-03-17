@@ -22,43 +22,19 @@
         </dependency>
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>post-publish-processor</artifactId>
-            <version>1.0.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.sunbird</groupId>
             <artifactId>video-stream-generator</artifactId>
             <version>1.0.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>content-publish</artifactId>
-            <version>1.0.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>search-indexer</artifactId>
+            <artifactId>knowlg-publish</artifactId>
             <version>1.0.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.sunbird</groupId>
             <artifactId>asset-enrichment</artifactId>
-            <version>1.0.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>auto-creator-v2</artifactId>
-            <version>1.0.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>content-auto-creator</artifactId>
             <version>1.0.0</version>
             <type>jar</type>
         </dependency>
@@ -76,19 +52,7 @@
         </dependency>
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>csp-migrator</artifactId>
-            <version>1.0.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.sunbird</groupId>
             <artifactId>live-node-publisher</artifactId>
-            <version>1.0.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>live-video-stream-generator</artifactId>
             <version>1.0.0</version>
             <type>jar</type>
         </dependency>
