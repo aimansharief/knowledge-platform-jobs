@@ -40,6 +40,7 @@ trait ObjectBundle {
     objList.map(data => {
       val identifier = data.getOrElse("identifier", "").asInstanceOf[String].replaceAll(".img", "")
       val mimeType = data.getOrElse("mimeType", "").asInstanceOf[String]
+      val visibility = data.getOrElse("visibility", "").asInstanceOf[String]
       val objectType: String = if(!data.contains("objectType") || data.getOrElse("objectType", "").asInstanceOf[String].isBlank || data.getOrElse("objectType", "").asInstanceOf[String].isEmpty) {
         val nodeProps = Option(janusGraphUtil.getNodeProperties(identifier)).getOrElse(janusGraphUtil.getNodeProperties(identifier))
         val metaData = if (nodeProps != null) nodeProps.asScala.toMap else Map.empty[String, AnyRef]
