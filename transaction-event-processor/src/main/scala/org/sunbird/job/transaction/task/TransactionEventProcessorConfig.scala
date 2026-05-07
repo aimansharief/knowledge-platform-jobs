@@ -225,6 +225,8 @@ class TransactionEventProcessorConfig(override val config: Config)
   val esJavaOptsKey: String =
     if (config.hasPath("es.javaOptsKey")) config.getString("es.javaOptsKey")
     else "OPENSEARCH_JAVA_OPTS"
+  // OpenSearch: plugins.security.disabled={true|false}. "true" disables security (default for local dev).
+  // Despite legacy field names, value "true" maps to plugins.security.disabled=true (security OFF).
   val xpackSecurityEnabled: String =
     if (config.hasPath("es.xpackSecurityEnabled"))
       config.getString("es.xpackSecurityEnabled")
