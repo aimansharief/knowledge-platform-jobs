@@ -7,16 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.HttpHost
 import org.apache.http.client.config.RequestConfig
-import org.elasticsearch.action.admin.indices.alias.Alias
-import org.elasticsearch.action.bulk.BulkRequest
-import org.elasticsearch.action.delete.DeleteRequest
-import org.elasticsearch.action.get.GetRequest
-import org.elasticsearch.action.index.IndexRequest
-import org.elasticsearch.action.update.UpdateRequest
-import org.elasticsearch.client.indices.CreateIndexRequest
-import org.elasticsearch.client.{Request, RequestOptions, Response, RestClient, RestClientBuilder, RestHighLevelClient}
-import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.xcontent.XContentType
+import org.opensearch.action.admin.indices.alias.Alias
+import org.opensearch.action.bulk.BulkRequest
+import org.opensearch.action.delete.DeleteRequest
+import org.opensearch.action.get.GetRequest
+import org.opensearch.action.index.IndexRequest
+import org.opensearch.action.update.UpdateRequest
+import org.opensearch.client.indices.CreateIndexRequest
+import org.opensearch.client.{Request, RequestOptions, Response, RestClient, RestClientBuilder, RestHighLevelClient}
+import org.opensearch.common.settings.Settings
+import org.opensearch.common.xcontent.XContentType
 import org.slf4j.LoggerFactory
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
