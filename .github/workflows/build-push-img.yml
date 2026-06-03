@@ -38,6 +38,12 @@ jobs:
         with:
           maven-version: 3.8.7
 
+      - name: Build cloud-storage-sdk fork (2.0.3-beta) into local Maven repo
+        run: |
+          git clone --depth 1 --branch fix/copyobject https://github.com/aimansharief/sunbird-cloud-storage-sdk.git /tmp/sunbird-cloud-storage-sdk
+          cd /tmp/sunbird-cloud-storage-sdk
+          mvn clean install -DskipTests
+
       - name: Login Docker Registry
         run: |
           case "${{ vars.REGISTRY_PROVIDER }}" in
